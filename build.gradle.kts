@@ -22,7 +22,8 @@ dependencies {
 }
 
 tasks.getByName<Test>("test") {
-    useJUnitPlatform()
+    //useJUnitPlatform() does not work with JPF
+    useJUnit()
 }
 
 
@@ -36,14 +37,12 @@ val verifyAll by tasks.register<DefaultTask>("runVerifyAll") {
 }
 
 /**
- * This function will return an array of string that will be used to mount
+ * This function will return an array of string that will be used to mount the container
  * The container will be mounted with all the files and folders of the project, except the build folder
  */
 val allFileButBuildAndHide = File(rootProject.rootDir.path)
-.listFiles { a -> !(a.name.startsWith(".") || a.name == "build") }
-?.map { it -> "type=bind,source=${it.absolutePath},target=/home/${it.name}" }?.flatMap { listOf("--mount", it) }
-    ?.toTypedArray()
-
+.listFiles { a -> !(a.name.startsWith(".") || a.name == "build") }?.map {"type=bind,source=${it.absolutePath},target=/home/${it.name}" }
+    ?.flatMap {listOf("--mount", it) }?.toTypedArray()
 
 /**
  * This function will mount a new container with the name passed
