@@ -1,0 +1,15 @@
+# Linux start script should use lf
+/gradlew        text eol=lf
+
+# These are Windows script files and should use crlf
+*.bat           text eol=crlf
+
+# These are Windows configuration files and should use crlf
+*.[cC][mM][dD]  text eol=crlf
+
+# These are Windows batch files and should use crlf
+*.[dBb][aA][tT] text eol=crlf
+
+# These are Windows help files and should use crlf
+*.[pP][sS]1     text eol=crlf
+
