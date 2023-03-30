@@ -5,19 +5,18 @@ import java.io.IOException;
 
 public class TestWalker {
 
-
     /**
-     Realizzare un programma concorrente che, data una directory D presente sul file system locale contenente un
-     insieme di sorgenti in Java (considerando anche qualsiasi sottodirectory, ricorsivamente), provveda a determinare
-     e visualizzare in standard output
-     ○	gli N sorgenti con il numero maggiore di linee di codice
-     ○	La distribuzione complessiva relativa a quanti sorgenti hanno un numero di linee di codice che ricade
-     in un certo intervallo, considerando un certo numero d'intervalli NI e un numero massimo MAXL di linee di codice
-     per delimitare l'estremo sinistro dell'ultimo intervallo.
-     N, D, NI e MAXL si presuppone siano parametri del programma, passati da linea di comando.
-     ■	Esempio: se NI = 5 e MAXL è 1000, allora il primo intervallo è [0,249], il secondo è  [250,499], il terzo è
-     [500,749], il quarto è [750,999], l'ultimo è [1000,infinito]. La distribuzione determina quanti sorgenti ci sono
-     per ogni intervallo  Ho un quadro Java dei sorgenti che ho (considerati tutti i sorgenti).
+     Create a concurrent program which, given a directory D present on the local file system containing a
+     set of sources in Java (also considering any subdirectories, recursively), provide to determine
+     and display on standard output:
+     ○ the N sources with the highest number of lines of code;
+     ○ The overall distribution related to how many sources have a number of lines of code that falls
+     in a certain interval, considering a certain number of intervals NI and a maximum number of code lines MAXL
+     to delimit the left end of the last range.
+     N, D, NI and MAXL are assumed to be program parameters, passed from the command line.
+     ■ Example: if NI = 5 and MAXL is 1000, then the first range is [0.249], the second is [250.499], the third is
+     [500,749], the fourth is [750,999], the last is [1000,infinity]. The distribution determines how many sources there are
+     for each range  I have a Java framework of the sources I have (all sources considered).
      */
      public static void main(String[] args) {
         if (args.length != Constants.Arguments.ARGUMENTS_SIZE) {

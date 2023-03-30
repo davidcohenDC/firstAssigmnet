@@ -19,7 +19,6 @@ public class SimpleWalker implements Walker {
     private final int intervalLength;
     private final Map<Integer,List<Path>> distribution = new HashMap<>();
 
-
     public SimpleWalker(Path dir, int maxFiles, int numIntervals, int maxLength) {
         this.directory = dir;
         this.maxFiles = maxFiles;
@@ -28,10 +27,6 @@ public class SimpleWalker implements Walker {
         this.intervalLength = maxLength / numIntervals;
     }
 
-    /**
-     * Walk the directory and print the longest line in each file
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     public void walk() throws IOException {
         walkRec(this.directory);
