@@ -31,7 +31,6 @@ public class SimpleWalker implements Walker {
 
     @Override
     public void walk() {
-
         Thread thread = new Thread(() -> {
             try {
                 walkRec(this.directory);
@@ -40,31 +39,18 @@ public class SimpleWalker implements Walker {
             }
         });
         thread.start();
+
         try {
             thread.join();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
 
-        //print MAX_FILES files with the longest lines
-        System.out.println("\nThe " + this.maxFiles + " files with the longest lines are:");
-        List<Path> files = this.distribution.getMap()
-                .values()
-                .stream()
-                .flatMap(List::stream)
-                .limit(this.maxFiles).toList();
-        files.forEach(System.out::println);
+        System.out.println("\nThe " + this.maxFiles + " files with the highest number of lines are:");
+        this.printMaxFiles();
 
-        //print DISTRIBUTION of files
         System.out.println("\nThe distribution of files is:");
-        IntStream.range(0, this.numIntervals)
-                .map(i -> i * this.intervalLength)
-                .forEach(start -> {
-                    int end = (start + this.intervalLength - 1);
-                    int interval = getInterval(end);
-                    List<Path> list = this.distribution.getMap().getOrDefault(interval, Collections.emptyList());
-                    System.out.println("[" + start + "," + end + "]: " + list.size());
-                });
+        this.printDistribution();
     }
 
     /**
@@ -119,4 +105,23 @@ public class SimpleWalker implements Walker {
         return numberOfLines / (this.maxLines / this.numIntervals);
     }
 
+    public void printMaxFiles() {
+        this.distribution.getMap()
+                .values()
+                .stream()
+                .flatMap(List::stream)
+                .limit(this.maxFiles).toList()
+                .forEach(System.out::println);
+    }
+
+    public void printDistribution() {
+        IntStream.range(0, this.numIntervals)
+                .map(i -> i * this.intervalLength)
+                .forEach(start -> {
+                    int end = (start + this.intervalLength - 1);
+                    int interval = getInterval(end);
+                    List<Path> list = this.distribution.getMap().getOrDefault(interval, Collections.emptyList());
+                    System.out.println("[" + start + "," + end + "]: " + list.size());
+                });
+    }
 }
