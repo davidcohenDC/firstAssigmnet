@@ -191,9 +191,7 @@ public class WalkerGUI {
         });
         printThread.start();
 
-        future.thenAccept(completed -> {
-            stopWalker();
-        });
+        future.thenAccept(completed -> stopWalker());
     }
 
     private void stopWalker() {
@@ -210,13 +208,9 @@ public class WalkerGUI {
         if (walker == null) {
             return;
         }
-        SwingUtilities.invokeLater(() -> {
-            distributionArea.setText(this.walker.getDistributionString());
-        });
+        SwingUtilities.invokeLater(() -> distributionArea.setText(this.walker.getDistributionString()));
 
-        SwingUtilities.invokeLater(() -> {
-            maxFilesArea.setText(this.walker.getMaxFilesString());
-        });
+        SwingUtilities.invokeLater(() -> maxFilesArea.setText(this.walker.getMaxFilesString()));
     }
 
     private void showErrorDialog(String message) {

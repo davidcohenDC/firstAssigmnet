@@ -22,7 +22,7 @@ public class SimpleWalker implements Walker {
     private volatile boolean isPrinting = false;
     private Thread printThread;
 
-    private boolean debug = false;
+    private boolean debug;
 
     public SimpleWalker(Path dir, int maxFiles, int numIntervals, int maxLength, BoundedBufferMap<Integer, List<Path>> distribution, boolean debug) {
         this.directory = dir;
