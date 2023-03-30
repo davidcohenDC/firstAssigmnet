@@ -1,5 +1,6 @@
 package walker;
 
+import boundedbuffer.BoundedBufferMap;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -17,7 +18,8 @@ public class SimpleWalker implements Walker {
     private final int numIntervals;
     private final int maxLines;
     private final int intervalLength;
-    private final Map<Integer,List<Path>> distribution = new HashMap<>();
+    private final BoundedBufferMap<Integer,List<Path>> distribution = new BoundedBufferMap<>();
+
 
     public SimpleWalker(Path dir, int maxFiles, int numIntervals, int maxLength) {
         this.directory = dir;
@@ -33,7 +35,7 @@ public class SimpleWalker implements Walker {
 
         //print MAX_FILES files with the longest lines
         System.out.println("\nThe " + this.maxFiles + " files with the longest lines are:");
-        List<Path> files = this.distribution
+        List<Path> files = this.distribution.getMap()
                 .values()
                 .stream()
                 .flatMap(List::stream)
@@ -47,7 +49,7 @@ public class SimpleWalker implements Walker {
                 .forEach(start -> {
                     int end = (start + this.intervalLength - 1);
                     int interval = getInterval(end);
-                    List<Path> list = this.distribution.getOrDefault(interval, Collections.emptyList());
+                    List<Path> list = this.distribution.getMap().getOrDefault(interval, Collections.emptyList());
                     System.out.println("[" + start + "," + end + "]: " + list.size());
                 });
     }
@@ -87,7 +89,7 @@ public class SimpleWalker implements Walker {
      */
     private Integer getInterval(int numberOfLines) {
         if(numberOfLines > this.maxLines) {
-            return this.numIntervals; // 3
+            return this.numIntervals;
         }
         return numberOfLines / (this.maxLines / this.numIntervals);
     }
