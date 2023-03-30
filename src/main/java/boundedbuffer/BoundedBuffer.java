@@ -8,4 +8,8 @@ public interface BoundedBuffer<X,Y> {
     boolean containsKey(X key);
     Map<X,Y> getMap();
 
+    void open();
+
+    void close();
+
 }

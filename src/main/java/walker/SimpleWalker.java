@@ -20,6 +20,7 @@ public class SimpleWalker implements Walker {
     private final int intervalLength;
     private final BoundedBufferMap<Integer,List<Path>> distribution;
 
+
     public SimpleWalker(Path dir, int maxFiles, int numIntervals, int maxLength, BoundedBufferMap<Integer,List<Path>> distribution) {
         this.directory = dir;
         this.maxFiles = maxFiles;
@@ -31,6 +32,7 @@ public class SimpleWalker implements Walker {
 
     @Override
     public void walk() {
+
         Thread thread = new Thread(() -> {
             try {
                 walkRec(this.directory);
@@ -39,7 +41,23 @@ public class SimpleWalker implements Walker {
             }
         });
         thread.start();
+        //check that all threads have finished
 
+//        Thread thread2 = new Thread(() -> {
+//            try {
+//                while (true) {
+//                    this.distribution.close();
+//                    Thread.sleep(1000);
+//                    this.distribution.open();
+//
+//                }
+//
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
+//        });
+//        thread2.start();
+//
         try {
             thread.join();
         } catch (InterruptedException e) {
@@ -58,6 +76,7 @@ public class SimpleWalker implements Walker {
      * @param directory the directory to walk
      */
     private void walkRec(Path directory) throws IOException {
+        System.out.println("Walking " + directory);
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory)) {
             for (Path path : stream) {
                 int numberOfLines;
@@ -89,6 +108,8 @@ public class SimpleWalker implements Walker {
                     }
                 }
             }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
