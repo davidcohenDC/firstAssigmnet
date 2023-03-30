@@ -6,77 +6,152 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-/**
- * A walker is an object that walks a directory and prints the longest line in each file.
- */
 public class SimpleWalker implements Walker {
     private final Path directory;
     private final int maxFiles;
     private final int numIntervals;
     private final int maxLines;
     private final int intervalLength;
-    private final BoundedBufferMap<Integer,List<Path>> distribution;
+    private final BoundedBufferMap<Integer, List<Path>> distribution;
 
+    private volatile boolean isRunning = true;
+    private volatile boolean isPrinting = false;
+    private Thread printThread;
 
-    public SimpleWalker(Path dir, int maxFiles, int numIntervals, int maxLength, BoundedBufferMap<Integer,List<Path>> distribution) {
+    private boolean debug = false;
+
+    public SimpleWalker(Path dir, int maxFiles, int numIntervals, int maxLength, BoundedBufferMap<Integer, List<Path>> distribution, boolean debug) {
         this.directory = dir;
         this.maxFiles = maxFiles;
         this.numIntervals = numIntervals;
         this.maxLines = maxLength;
         this.intervalLength = maxLength / numIntervals;
         this.distribution = distribution;
+        this.debug = debug;
     }
 
     @Override
-    public void walk() {
-
+    public boolean walk() {
         Thread thread = new Thread(() -> {
             try {
                 walkRec(this.directory);
-            } catch (IOException e) {
+            } catch (IOException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
+            isRunning = false;
         });
         thread.start();
-        //check that all threads have finished
 
-//        Thread thread2 = new Thread(() -> {
-//            try {
-//                while (true) {
-//                    this.distribution.close();
-//                    Thread.sleep(1000);
-//                    this.distribution.open();
-//
-//                }
-//
-//            } catch (InterruptedException e) {
-//                throw new RuntimeException(e);
-//            }
-//        });
-//        thread2.start();
-//
+        startPrintThread();
+
         try {
             thread.join();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        stopPrintThread();
+        if(debug) {
+            System.out.println("\nThe " + this.maxFiles + " files with the highest number of lines are: \n" + this.getMaxFilesString());
+            System.out.println("\nThe distribution of files is:\n" + this.getDistributionString());
+        }
+        return true;
+    }
 
-        System.out.println("\nThe " + this.maxFiles + " files with the highest number of lines are:");
-        this.printMaxFiles();
+    public String getMaxFilesString() {
+        List<String> fileNames = this.distribution.getMap()
+                .values()
+                .stream()
+                .flatMap(List::stream)
+                .limit(this.maxFiles).map(Path::toString)
+                .collect(Collectors.toList());
+        return String.join("\n", fileNames);
+    }
 
-        System.out.println("\nThe distribution of files is:");
-        this.printDistribution();
+    public String getDistributionString() {
+        StringBuilder sb = new StringBuilder();
+        IntStream.range(0, this.numIntervals)
+                .map(i -> i * this.intervalLength)
+                .forEach(start -> {
+                    int end = (start + this.intervalLength - 1);
+                    int interval = getInterval(end);
+                    List<Path> list = this.distribution.getMap().getOrDefault(interval, Collections.emptyList());
+                    sb.append("[").append(start).append(",").append(end).append("]: ").append(list.size()).append("\n");
+                });
+        return sb.toString();
+    }
+
+    @Override
+    public void stop() {
+        isRunning = false;
+    }
+
+    @Override
+    public void resume() {
+        isRunning = true;
+        startPrintThread();
+    }
+
+
+    /**
+     * Start the print thread
+     * It will print the distribution every second
+     * It will be interrupted when the walker is done
+     */
+    private void startPrintThread() {
+        if (isPrinting) {
+            // Already printing
+            return;
+        }
+
+        isPrinting = true;
+        printThread = new Thread(() -> {
+            while (isPrinting) {
+                if (debug) {
+                    System.out.println(getDistributionString());
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            }
+        });
+        printThread.start();
     }
 
     /**
-     * Recursive method to walk the directory
-     * @param directory the directory to walk
+     * Stop the print thread
+     * It will wait for the thread to finish
+     * If the thread is interrupted, it will print the stack trace
+     * It will be interrupted when the walker is done
      */
-    private void walkRec(Path directory) throws IOException {
-        System.out.println("Walking " + directory);
+    private void stopPrintThread() {
+        isPrinting = false;
+        printThread.interrupt();
+        try {
+            printThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Core of the walker
+     * It will walk recursively through the directory and add the files to the distribution map
+     * If the file has more lines than the max lines, it will be in a new interval that goes from the max lines to infinity
+     * @param directory the directory to walk
+     * @throws IOException if an I/O error occurs
+     * @throws InterruptedException if the thread is interrupted
+     */
+    private void walkRec(Path directory) throws IOException, InterruptedException {
+        if(debug) {
+            System.out.println("Walking " + directory);
+        }
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory)) {
             for (Path path : stream) {
                 int numberOfLines;
@@ -84,32 +159,23 @@ public class SimpleWalker implements Walker {
                     try (Stream<String> fileStream = Files.lines(path)) {
                         numberOfLines = (int) fileStream.count();
                     }
-                    int interval = getInterval(numberOfLines);
-                    if( this.distribution.containsKey(interval)) {
-                        this.distribution.get(interval).add(path);
-                    } else {
-                        List<Path> list = new ArrayList<>();
-                        list.add(path);
-                        this.distribution.put(interval, list);
+
+                    synchronized (distribution) {
+                        int interval = getInterval(numberOfLines);
+                        if (distribution.containsKey(interval)) {
+                            distribution.get(interval).add(path);
+                        } else {
+                            List<Path> list = new ArrayList<>();
+                            list.add(path);
+                            distribution.put(interval, list);
+                        }
                     }
                 } else if (Files.isDirectory(path) && !Files.isHidden(path)) {
-                    Thread thread = new Thread(() -> {
-                        try {
-                            walkRec(path);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-                    thread.start();
-                    try {
-                        thread.join();
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+                    if (isRunning) {
+                        walkRec(path);
                     }
                 }
             }
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -126,23 +192,5 @@ public class SimpleWalker implements Walker {
         return numberOfLines / (this.maxLines / this.numIntervals);
     }
 
-    public void printMaxFiles() {
-        this.distribution.getMap()
-                .values()
-                .stream()
-                .flatMap(List::stream)
-                .limit(this.maxFiles).toList()
-                .forEach(System.out::println);
-    }
 
-    public void printDistribution() {
-        IntStream.range(0, this.numIntervals)
-                .map(i -> i * this.intervalLength)
-                .forEach(start -> {
-                    int end = (start + this.intervalLength - 1);
-                    int interval = getInterval(end);
-                    List<Path> list = this.distribution.getMap().getOrDefault(interval, Collections.emptyList());
-                    System.out.println("[" + start + "," + end + "]: " + list.size());
-                });
-    }
 }

@@ -2,102 +2,80 @@ package boundedbuffer;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class BoundedBufferMap<X,Y> implements BoundedBuffer<X,Y>{
     private final Map<X, Y> buffer;
-    private final Lock mutex;
-
-    private final Condition canDoSomething;
-
+    private final ReadWriteLock lock;
     private boolean isOpen = true;
 
     public BoundedBufferMap() {
         this.buffer = new HashMap<>();
-        this.mutex = new ReentrantLock();
-        this.canDoSomething = mutex.newCondition();
+        this.lock = new ReentrantReadWriteLock();
     }
 
     @Override
-    public synchronized void put(X key, Y item) throws InterruptedException {
+    public void put(X key, Y item) throws InterruptedException {
+        lock.writeLock().lockInterruptibly();
         try {
-            mutex.lock();
             if(!this.isOpen) {
-                System.out.println("Waiting for buffer to be open");
-                this.canDoSomething.await();
+                throw new InterruptedException("Buffer is closed");
             }
             buffer.put(key, item);
         } finally {
-            mutex.unlock();
+            lock.writeLock().unlock();
         }
     }
 
     @Override
-    public synchronized Y get(X key) throws InterruptedException {
+    public Y get(X key) throws InterruptedException {
+        lock.readLock().lockInterruptibly();
         try {
-            mutex.lock();
             if(!this.isOpen) {
-                System.out.println("Waiting for buffer to be open");
-                this.canDoSomething.await();
+                throw new InterruptedException("Buffer is closed");
             }
             return buffer.get(key);
         } finally {
-            mutex.unlock();
+            lock.readLock().unlock();
         }
     }
 
     @Override
     public boolean containsKey(X key) {
+        lock.readLock().lock();
         try {
-            mutex.lock();
-            if(!this.isOpen) {
-                try {
-                    System.out.println("Waiting for buffer to be open");
-                    this.canDoSomething.await();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
             return buffer.containsKey(key);
         } finally {
-            mutex.unlock();
+            lock.readLock().unlock();
         }
     }
 
     @Override
-    public synchronized Map<X, Y> getMap() {
+    public Map<X, Y> getMap() {
+        lock.readLock().lock();
         try {
-            mutex.lock();
-            if(!this.isOpen) {
-                System.out.println("Waiting for buffer to be open");
-                this.canDoSomething.await();
-            }
-            return buffer;
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            return new HashMap<>(buffer);
         } finally {
-            mutex.unlock();
+            lock.readLock().unlock();
         }
     }
 
     public void close() {
+        lock.writeLock().lock();
         try {
-            mutex.lock();
             this.isOpen = false;
         } finally {
-            mutex.unlock();
+            lock.writeLock().unlock();
         }
     }
 
     public void open() {
+        lock.writeLock().lock();
         try {
-            mutex.lock();
             this.isOpen = true;
-            this.canDoSomething.signalAll();
         } finally {
-            mutex.unlock();
+            lock.writeLock().unlock();
         }
     }
 

@@ -44,7 +44,7 @@ public class TestWalker {
             System.exit(1);
         }
         BoundedBufferMap<Integer, List<Path>> distribution = new BoundedBufferMap<>();
-        Walker walker = new SimpleWalker(dir.toPath(), maxFiles, numIntervals, maxLength, distribution);
+        Walker walker = new SimpleWalker(dir.toPath(), maxFiles, numIntervals, maxLength, distribution,true);
          try {
                 walker.walk();
          } catch (IOException e) {
