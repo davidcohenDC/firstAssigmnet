@@ -22,8 +22,8 @@ dependencies {
 }
 
 tasks.getByName<Test>("test") {
-    //useJUnitPlatform() does not work with JPF
-    useJUnit()
+    useJUnitPlatform()
+//    useJUnit()
 }
 
 

@@ -1,7 +1,8 @@
 package walker;
 
+import java.io.IOException;
+
 public interface Walker {
 
-    void walk();
-
+    void walk() throws IOException;
 }

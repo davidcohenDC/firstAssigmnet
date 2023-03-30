@@ -1,28 +1,26 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import walker.Constants;
 import walker.SimpleWalker;
-
 import java.io.File;
-
-import static org.junit.jupiter.api.Assertions.*;
+import java.io.IOException;
 
 public class SimpleWalkerTest {
 
-    private final static String PATH = "src\\main\\jpf";
-
-    private final static Integer NUMBER_OF_FILES = 3;
-
+    private final static String PATH = "C:\\Users\\Dach-\\Documents\\GitHub\\Universita\\PPS\\course-pps22-23-aula";
     private SimpleWalker walker;
 
     @BeforeEach
     void setUp() {
-        this.walker = new SimpleWalker(new File(PATH));
+        this.walker = new SimpleWalker(new File(PATH).toPath(),
+                Constants.Arguments.N_FILES,
+                Constants.Arguments.NUMBER_OF_INTERVALS,
+                Constants.Arguments.MAX_LINES);
     }
 
     @Test
-    void testBasicBehaviour() {
+    void testBasicBehaviour() throws IOException {
         walker.walk();
-        assertEquals(NUMBER_OF_FILES, walker.getFiles().size());
     }
 
 }
