@@ -18,15 +18,16 @@ public class SimpleWalker implements Walker {
     private final int numIntervals;
     private final int maxLines;
     private final int intervalLength;
-    private final BoundedBufferMap<Integer,List<Path>> distribution = new BoundedBufferMap<>();
+    private final BoundedBufferMap<Integer,List<Path>> distribution;
 
 
-    public SimpleWalker(Path dir, int maxFiles, int numIntervals, int maxLength) {
+    public SimpleWalker(Path dir, int maxFiles, int numIntervals, int maxLength, BoundedBufferMap<Integer,List<Path>> distribution) {
         this.directory = dir;
         this.maxFiles = maxFiles;
         this.numIntervals = numIntervals;
         this.maxLines = maxLength;
         this.intervalLength = maxLength / numIntervals;
+        this.distribution = distribution;
     }
 
     @Override

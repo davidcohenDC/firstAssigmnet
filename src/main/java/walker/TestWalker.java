@@ -1,7 +1,11 @@
 package walker;
 
+import boundedbuffer.BoundedBufferMap;
+
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
 
 public class TestWalker {
 
@@ -39,8 +43,8 @@ public class TestWalker {
             System.out.println("The directory " + directory + " does not exist");
             System.exit(1);
         }
-
-        Walker walker = new SimpleWalker(dir.toPath(), maxFiles, numIntervals, maxLength);
+        BoundedBufferMap<Integer, List<Path>> distribution = new BoundedBufferMap<>();
+        Walker walker = new SimpleWalker(dir.toPath(), maxFiles, numIntervals, maxLength, distribution);
          try {
                 walker.walk();
          } catch (IOException e) {
