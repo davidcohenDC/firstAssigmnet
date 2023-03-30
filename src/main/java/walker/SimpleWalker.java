@@ -20,7 +20,6 @@ public class SimpleWalker implements Walker {
     private final int intervalLength;
     private final BoundedBufferMap<Integer,List<Path>> distribution;
 
-
     public SimpleWalker(Path dir, int maxFiles, int numIntervals, int maxLength, BoundedBufferMap<Integer,List<Path>> distribution) {
         this.directory = dir;
         this.maxFiles = maxFiles;
@@ -31,8 +30,21 @@ public class SimpleWalker implements Walker {
     }
 
     @Override
-    public void walk() throws IOException {
-        walkRec(this.directory);
+    public void walk() {
+
+        Thread thread = new Thread(() -> {
+            try {
+                walkRec(this.directory);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
         //print MAX_FILES files with the longest lines
         System.out.println("\nThe " + this.maxFiles + " files with the longest lines are:");
@@ -76,7 +88,19 @@ public class SimpleWalker implements Walker {
                         this.distribution.put(interval, list);
                     }
                 } else if (Files.isDirectory(path) && !Files.isHidden(path)) {
-                    walkRec(path);
+                    Thread thread = new Thread(() -> {
+                        try {
+                            walkRec(path);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                    thread.start();
+                    try {
+                        thread.join();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         }
