@@ -96,9 +96,7 @@ public class DirectoryWalker implements Walker {
             for (Path path : stream) {
                 int numberOfLines;
                 if (Files.isRegularFile(path) && path.getFileName().toString().endsWith(".java")) {
-                    try (Stream<String> fileStream = Files.lines(path)) {
-                        numberOfLines = (int) fileStream.count();
-                    }
+                    numberOfLines = WalkerUtils.countLines(path);
                     synchronized (distribution) {
                         int interval = getInterval(numberOfLines);
                         this.distribution.writeInterval(interval,path);
@@ -140,7 +138,4 @@ public class DirectoryWalker implements Walker {
     public int getMaxFiles() {
         return this.maxFiles;
     }
-
-
-
 }
