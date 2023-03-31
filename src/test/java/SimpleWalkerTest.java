@@ -10,14 +10,6 @@ public class SimpleWalkerTest {
     private final static String PATH = "C:\\Users\\Dach-\\Documents\\GitHub\\Universita\\PPS\\course-pps22-23-aula";
     private SimpleWalker walker;
 
-    @BeforeEach
-    void setUp() {
-        this.walker = new SimpleWalker(new File(PATH).toPath(),
-                Constants.Arguments.N_FILES,
-                Constants.Arguments.NUMBER_OF_INTERVALS,
-                Constants.Arguments.MAX_LINES);
-    }
-
     @Test
     void testBasicBehaviour() throws IOException {
         walker.walk();

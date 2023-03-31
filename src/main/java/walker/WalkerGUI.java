@@ -144,9 +144,23 @@ public class WalkerGUI {
             return;
         }
 
+        int maxLength;
+        try {
+            maxLength = Integer.parseInt(maxLengthField.getText().trim());
+        } catch (NumberFormatException e) {
+            showErrorDialog("Invalid value for max length: " + maxLengthField.getText().trim());
+            return;
+        }
+
         int maxFiles;
         try {
             maxFiles = Integer.parseInt(maxFilesField.getText().trim());
+            if(maxFiles >= maxLength) {
+                JOptionPane.showMessageDialog
+                        (null, "Invalid value for max file: " + maxLengthField.getText().trim()
+                               +"!!\nValue need to be <= Max Files","Bad value", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
         } catch (NumberFormatException e) {
             showErrorDialog("Invalid value for max files: " + maxFilesField.getText().trim());
             return;
@@ -155,16 +169,14 @@ public class WalkerGUI {
         int numIntervals;
         try {
             numIntervals = Integer.parseInt(numIntervalsField.getText().trim());
+            if(numIntervals >= maxLength) {
+                JOptionPane.showMessageDialog
+                        (null, "Invalid value for num intervals: " + numIntervalsField.getText().trim()
+                                +"!!\nValue need to be <= Max Files","Bad value", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
         } catch (NumberFormatException e) {
             showErrorDialog("Invalid value for num intervals: " + numIntervalsField.getText().trim());
-            return;
-        }
-
-        int maxLength;
-        try {
-            maxLength = Integer.parseInt(maxLengthField.getText().trim());
-        } catch (NumberFormatException e) {
-            showErrorDialog("Invalid value for max length: " + maxLengthField.getText().trim());
             return;
         }
 

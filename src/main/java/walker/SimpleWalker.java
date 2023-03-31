@@ -17,11 +17,9 @@ public class SimpleWalker implements Walker {
     private final int maxLines;
     private final int intervalLength;
     private final BoundedBufferMap<Integer, List<Path>> distribution;
-
     private volatile boolean isRunning = true;
     private volatile boolean isPrinting = false;
     private Thread printThread;
-
     private final boolean debug;
 
     public SimpleWalker(Path dir, int maxFiles, int numIntervals, int maxLength, BoundedBufferMap<Integer, List<Path>> distribution, boolean debug) {
@@ -73,13 +71,17 @@ public class SimpleWalker implements Walker {
 
     public String getDistributionString() {
         StringBuilder sb = new StringBuilder();
-        IntStream.range(0, this.numIntervals)
+        IntStream.range(0, this.numIntervals+1)
                 .map(i -> i * this.intervalLength)
                 .forEach(start -> {
                     int end = (start + this.intervalLength - 1);
                     int interval = getInterval(end);
                     List<Path> list = this.distribution.getMap().getOrDefault(interval, Collections.emptyList());
-                    sb.append("[").append(start).append(",").append(end).append("]: ").append(list.size()).append("\n");
+                    if(start == this.maxLines) {
+                        sb.append("[").append(start).append(",+∞]: ").append(list.size()).append("\n");
+                    } else {
+                        sb.append("[").append(start).append(",").append(end).append("]: ").append(list.size()).append("\n");
+                    }
                 });
         return sb.toString();
     }
