@@ -1,6 +1,6 @@
 package walker;
 
-import boundedbuffer.BoundedBufferMap;
+import boundedbuffer.Distribution;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -16,13 +16,13 @@ public class SimpleWalker implements Walker {
     private final int numIntervals;
     private final int maxLines;
     private final int intervalLength;
-    private final BoundedBufferMap<Integer, List<Path>> distribution;
+    private final Distribution<Integer, Path> distribution;
     private volatile boolean isRunning = true;
     private volatile boolean isPrinting = false;
     private Thread printThread;
     private final boolean debug;
 
-    public SimpleWalker(Path dir, int maxFiles, int numIntervals, int maxLength, BoundedBufferMap<Integer, List<Path>> distribution, boolean debug) {
+    public SimpleWalker(Path dir, int maxFiles, int numIntervals, int maxLength, Distribution<Integer, Path> distribution, boolean debug) {
         this.directory = dir;
         this.maxFiles = maxFiles;
         this.numIntervals = numIntervals;
@@ -60,7 +60,7 @@ public class SimpleWalker implements Walker {
     }
 
     public String getMaxFilesString() {
-        List<String> fileNames = this.distribution.getMap()
+        List<String> fileNames = this.distribution.readDistribution()
                 .values()
                 .stream()
                 .flatMap(List::stream)
@@ -76,7 +76,7 @@ public class SimpleWalker implements Walker {
                 .forEach(start -> {
                     int end = (start + this.intervalLength - 1);
                     int interval = getInterval(end);
-                    List<Path> list = this.distribution.getMap().getOrDefault(interval, Collections.emptyList());
+                    List<Path> list = this.distribution.readDistribution().getOrDefault(interval, Collections.emptyList());
                     if(start == this.maxLines) {
                         sb.append("[").append(start).append(",+∞]: ").append(list.size()).append("\n");
                     } else {
@@ -161,16 +161,16 @@ public class SimpleWalker implements Walker {
                     try (Stream<String> fileStream = Files.lines(path)) {
                         numberOfLines = (int) fileStream.count();
                     }
-
                     synchronized (distribution) {
                         int interval = getInterval(numberOfLines);
-                        if (distribution.containsKey(interval)) {
-                            distribution.get(interval).add(path);
-                        } else {
-                            List<Path> list = new ArrayList<>();
-                            list.add(path);
-                            distribution.put(interval, list);
-                        }
+                        this.distribution.writeInterval(interval,path);
+//                        if (distribution.containsKey(interval)) {
+//                            distribution.readInterval(interval).add(path);
+//                        } else {
+//                            List<Path> list = new ArrayList<>();
+//                            list.add(path);
+//                            distribution.writeInterval(interval, list);
+//                        }
                     }
                 } else if (Files.isDirectory(path) && !Files.isHidden(path)) {
                     if (isRunning) {

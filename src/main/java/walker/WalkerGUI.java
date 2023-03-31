@@ -3,10 +3,9 @@ package walker;
 import java.awt.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import javax.swing.*;
-import boundedbuffer.BoundedBufferMap;
+import boundedbuffer.Distribution;
 
 public class WalkerGUI {
 
@@ -182,7 +181,7 @@ public class WalkerGUI {
 
         Path dirPath = Paths.get(directory);
 
-        BoundedBufferMap<Integer, List<Path>> distribution = new BoundedBufferMap<>();
+        Distribution<Integer, Path> distribution = new Distribution<>();
         walker = new SimpleWalker(dirPath, maxFiles, numIntervals, maxLength, distribution, true);
 
         isStopped = false;
@@ -195,7 +194,7 @@ public class WalkerGUI {
             while (!isStopped) {
                 printResults();
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(1);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
