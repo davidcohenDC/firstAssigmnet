@@ -43,7 +43,7 @@ public class TestWalker {
             System.exit(1);
         }
         Distribution<Integer, Path> distribution = new Distribution<>();
-        Walker walker = new SimpleWalker(dir.toPath(), maxFiles, numIntervals, maxLength, distribution,true);
+        Walker walker = new DirectoryWalker(dir.toPath(), maxFiles, numIntervals, maxLength, distribution,true);
          try {
                 walker.walk();
          } catch (IOException e) {

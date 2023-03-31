@@ -1,6 +1,9 @@
 package walker;
 
+import boundedbuffer.Distribution;
+
 import java.io.IOException;
+import java.nio.file.Path;
 
 public interface Walker {
 
@@ -11,19 +14,11 @@ public interface Walker {
      */
     boolean walk() throws IOException;
 
-    /**
-     * get the string representation of the max lines
-     */
-    String getMaxFilesString();
-
-    /**
-     * get the string representation of the distribution map
-     */
-    String getDistributionString();
-
     void stop();
 
     void resume();
+
+    Distribution<Integer, Path> getDistribution();
 
 }
 

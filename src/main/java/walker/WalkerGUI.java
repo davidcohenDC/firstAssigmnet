@@ -4,6 +4,7 @@ import java.awt.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import javax.swing.*;
 import boundedbuffer.Distribution;
 
@@ -17,7 +18,7 @@ public class WalkerGUI {
     private final JButton stopButton;
     private final JTextArea maxFilesArea;
     private final JTextArea distributionArea;
-    private SimpleWalker walker;
+    private DirectoryWalker walker;
     private volatile boolean isStopped;
 
 
@@ -182,7 +183,7 @@ public class WalkerGUI {
         Path dirPath = Paths.get(directory);
 
         Distribution<Integer, Path> distribution = new Distribution<>();
-        walker = new SimpleWalker(dirPath, maxFiles, numIntervals, maxLength, distribution, true);
+        walker = new DirectoryWalker(dirPath, maxFiles, numIntervals, maxLength, distribution, true);
 
         isStopped = false;
         startButton.setEnabled(false);
@@ -219,9 +220,12 @@ public class WalkerGUI {
         if (walker == null) {
             return;
         }
-        SwingUtilities.invokeLater(() -> distributionArea.setText(this.walker.getDistributionString()));
 
-        SwingUtilities.invokeLater(() -> maxFilesArea.setText(this.walker.getMaxFilesString()));
+        DistributionPrinter printer = new DistributionPrinter(this.walker, (int) TimeUnit.SECONDS.toSeconds(1));
+
+        SwingUtilities.invokeLater(() -> distributionArea.setText(printer.getDistributionString()));
+
+        SwingUtilities.invokeLater(() -> maxFilesArea.setText(printer.getMaxFilesString()));
     }
 
     private void showErrorDialog(String message) {
