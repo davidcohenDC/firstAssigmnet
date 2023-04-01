@@ -18,7 +18,7 @@ The application starts in the IDLE state. When the user clicks the "Start" butto
 ONFIGURING state, where it validates and processes the user's input. If the input is valid, the application transitions
 to the RUNNING state and starts the directory walker.
 
-While in the RUNNING state, the application periodically updates the distribution and max files displayed in the GUI.
+While in the RUNNING state, the application periodically updates the distribution and max files displayed in the GUI.l
 If the user clicks the "Stop" button, the application transitions to the STOPPED state and stops the directory walker.
 
 If an error occurs during configuration or while running, the application transitions to the CONFIGURING_2 or
