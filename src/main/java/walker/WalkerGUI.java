@@ -183,7 +183,7 @@ public class WalkerGUI {
         Path dirPath = Paths.get(directory);
 
         Distribution<Integer, Path> distribution = new Distribution<>();
-        walker = new DirectoryWalker(dirPath, maxFiles, numIntervals, maxLength, distribution);
+        walker = new DirectoryWalker(dirPath, maxFiles, numIntervals, maxLength, distribution,Runtime.getRuntime().availableProcessors()-2);
 
         isStopped = false;
         startButton.setEnabled(false);
@@ -210,7 +210,6 @@ public class WalkerGUI {
         if (this.walker != null) {
             walker.stop();
         }
-
         this.isStopped = true;
         this.startButton.setEnabled(true);
         this.stopButton.setEnabled(false);
