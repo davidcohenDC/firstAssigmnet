@@ -1,0 +1,27 @@
++--------+       +--------------+       +--------------+       +--------+
+|   IDLE | ----> |  CONFIGURING | ----> |    RUNNING   | ----> | STOPPED |
++--------+       +--------------+       +--------------+       +--------+
+     |                  |                        |                    |
+     |                  |                        |                    |
+     |    +-------------+                        |                    |
+     |    |                                       |                    |
+     |    |                 +---------------+     |                    |
+     +----|---------------- | CONFIGURING_2 | <---+                    |
+          |                 +---------------+                          |
+          |                          |                                  |
+          |                          |                                  |
+          |                 +---------------+                          |
+          +----------------- |   RUNNING_2  | <-------------------------+
+                              +---------------+
+
+The application starts in the IDLE state. When the user clicks the "Start" button, the application transitions to the C
+ONFIGURING state, where it validates and processes the user's input. If the input is valid, the application transitions
+to the RUNNING state and starts the directory walker.
+
+While in the RUNNING state, the application periodically updates the distribution and max files displayed in the GUI.
+If the user clicks the "Stop" button, the application transitions to the STOPPED state and stops the directory walker.
+
+If an error occurs during configuration or while running, the application transitions to the CONFIGURING_2 or
+RUNNING_2 state, respectively. From these states, the user can try to reconfigure or stop the application, respectively.
+
+From any non-terminal state, the user can always return to the IDLE state by closing the application window.
