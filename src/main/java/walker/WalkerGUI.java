@@ -183,7 +183,7 @@ public class WalkerGUI {
         Path dirPath = Paths.get(directory);
 
         Distribution<Integer, Path> distribution = new Distribution<>();
-        walker = new DirectoryWalker(dirPath, maxFiles, numIntervals, maxLength, distribution, true);
+        walker = new DirectoryWalker(dirPath, maxFiles, numIntervals, maxLength, distribution);
 
         isStopped = false;
         startButton.setEnabled(false);
@@ -221,7 +221,7 @@ public class WalkerGUI {
             return;
         }
 
-        DistributionPrinter printer = new DistributionPrinter(this.walker, (int) TimeUnit.SECONDS.toSeconds(1));
+        DistributionPrinter printer = new DistributionPrinter(this.walker.getParams(), (int) TimeUnit.SECONDS.toSeconds(1));
 
         SwingUtilities.invokeLater(() -> distributionArea.setText(printer.getDistributionString()));
 

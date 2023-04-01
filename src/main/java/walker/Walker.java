@@ -16,9 +16,7 @@ public interface Walker {
 
     void stop();
 
-    void resume();
-
-    Distribution<Integer, Path> getDistribution();
+    DirectoryWalkerParams getParams();
 
 }
 

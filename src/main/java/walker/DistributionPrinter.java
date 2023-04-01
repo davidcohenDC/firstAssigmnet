@@ -11,13 +11,13 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class DistributionPrinter implements Runnable {
-    private final DirectoryWalker walker;
+    private final DirectoryWalkerParams params;
     private final AtomicBoolean isPrinting = new AtomicBoolean(false);
     private final int intervalInSeconds;
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
-    public DistributionPrinter(DirectoryWalker walker, int intervalInSeconds) {
-        this.walker = walker;
+    public DistributionPrinter(DirectoryWalkerParams params, int intervalInSeconds) {
+        this.params = params;
         this.intervalInSeconds = intervalInSeconds;
     }
 
@@ -42,15 +42,15 @@ public class DistributionPrinter implements Runnable {
     }
 
     public String getDistributionString() {
-        synchronized (this.walker.getDistribution()) {
+        synchronized (this.params.getDistribution()) {
             StringBuilder sb = new StringBuilder();
-            IntStream.range(0, this.walker.getNumIntervals() + 1)
-                    .map(i -> i * this.walker.getIntervalLength())
+            IntStream.range(0, this.params.getNumIntervals() + 1)
+                    .map(i -> i * this.params.getIntervalLength())
                     .forEach(start -> {
-                        int end = (start + this.walker.getIntervalLength() - 1);
-                        int interval = this.walker.getInterval(end);
-                        List<Path> list = this.walker.getDistribution().readDistribution().getOrDefault(interval, Collections.emptyList());
-                        if (start == this.walker.getMaxLines()) {
+                        int end = (start + this.params.getIntervalLength() - 1);
+                        int interval = start / this.params.getIntervalLength();
+                        List<Path> list = this.params.getDistribution().readDistribution().getOrDefault(interval, Collections.emptyList());
+                        if (start == this.params.getMaxLines()) {
                             sb.append("[").append(start).append(",+∞]: ").append(list.size()).append("\n");
                         } else {
                             sb.append("[").append(start).append(",").append(end).append("]: ").append(list.size()).append("\n");
@@ -61,12 +61,12 @@ public class DistributionPrinter implements Runnable {
     }
 
     public String getMaxFilesString() {
-        synchronized (this.walker.getDistribution()) {
-            List<String> fileNames = this.walker.getDistribution().readDistribution()
+        synchronized (this.params.getDistribution()) {
+            List<String> fileNames = this.params.getDistribution().readDistribution()
                     .values()
                     .stream()
                     .flatMap(List::stream)
-                    .limit(this.walker.getMaxFiles())
+                    .limit(this.params.getMaxFiles())
                     .map(Path::toString) // Convert Path objects to String
                     .collect(Collectors.toList());
             return String.join("\n", fileNames);

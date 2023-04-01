@@ -5,6 +5,8 @@ import java.io.OutputStream
 
 plugins {
     id("java")
+    kotlin("jvm") version "1.5.31"
+    id("org.jetbrains.kotlin.kapt") version "1.5.31"
 }
 
 group = "org.example"
@@ -15,10 +17,20 @@ repositories {
 }
 
 dependencies {
+
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")
     implementation(files("lib/jpf-classes.jar"))
     implementation(files("lib/jpf-annotations.jar"))
+    implementation("org.projectlombok:lombok:1.18.20")
+    kapt("org.projectlombok:lombok:1.18.20")
+}
+
+kapt {
+    arguments {
+        arg("lombok.addLombokGeneratedAnnotation", "true")
+    }
+    useBuildCache = true
 }
 
 tasks.getByName<Test>("test") {
