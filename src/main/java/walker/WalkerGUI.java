@@ -18,7 +18,7 @@ public class WalkerGUI {
     private final JButton stopButton;
     private final JTextArea maxFilesArea;
     private final JTextArea distributionArea;
-    private DirectoryWalker walker;
+    private DirectoryWalkerAgent walker;
     private volatile boolean isStopped;
 
 
@@ -183,7 +183,7 @@ public class WalkerGUI {
         Path dirPath = Paths.get(directory);
 
         Distribution<Integer, Path> distribution = new Distribution<>();
-        walker = new DirectoryWalker(dirPath, maxFiles, numIntervals, maxLength, distribution,Runtime.getRuntime().availableProcessors()-2);
+        walker = new DirectoryWalkerAgent(dirPath, maxFiles, numIntervals, maxLength, distribution,Runtime.getRuntime().availableProcessors()-2);
 
         isStopped = false;
         startButton.setEnabled(false);

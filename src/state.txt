@@ -25,3 +25,34 @@ If an error occurs during configuration or while running, the application transi
 RUNNING_2 state, respectively. From these states, the user can try to reconfigure or stop the application, respectively.
 
 From any non-terminal state, the user can always return to the IDLE state by closing the application window.
+
+
+Reason to create thread on files instead of recursion walkRec :
+When processing a large directory with many files, the processing time can become a bottleneck, as each file must be
+ read and analyzed sequentially. This can be a slow and inefficient process, especially when there are many files to process.
+
+To make the processing more efficient, we can take advantage of the available processing resources by running multiple
+threads in parallel, each processing a separate file. By creating a new thread for each file processing, we can ensure
+ that multiple files are being processed simultaneously, making the overall processing faster and more efficient.
+
+However, when multiple threads are accessing and updating shared data, such as the Distribution object in this case,
+there is a risk of data corruption or inconsistencies if proper synchronization mechanisms are not used.
+
+For example, if two threads try to update the same Distribution object at the same time, they could potentially overwrite
+ each other's changes, leading to incorrect or inconsistent data.
+
+To prevent this from happening, we can use synchronization mechanisms such as a Semaphore or monitor to ensure that only
+ a limited number of threads are running at the same time, and that access to shared data is synchronized and serialized.
+
+In the current implementation of the DirectoryWalkerAgent class, a Semaphore object is used to limit the number of
+threads that can be running at the same time. This ensures that only a limited number of files are being processed
+simultaneously, reducing the risk of data corruption or inconsistencies.
+
+In the alternative implementation using a monitor, the synchronized keyword is used to ensure that only one thread
+can access a critical section of code at a time. This ensures that access to shared data is synchronized and serialized,
+ reducing the risk of data corruption or inconsistencies.
+
+In summary, creating a new thread for each file processing is more efficient because it takes advantage of the available
+ processing resources and reduces the overall processing time. However, when multiple threads are accessing and updating
+  shared data, proper synchronization mechanisms such as a Semaphore or monitor must be used to ensure data consistency
+  and prevent data corruption or inconsistencies.

@@ -4,6 +4,7 @@ import boundedbuffer.Distribution;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * An abstract class that provides a skeleton implementation of the directory walking functionality
@@ -24,6 +25,8 @@ public abstract class AbstractDirectoryWalker implements Walker {
 
     // The parameters for configuring the directory walking behavior
     protected final DirectoryWalkerParams params;
+    protected final AtomicBoolean isRunning = new AtomicBoolean(false);
+
 
     /**
      * Creates a new instance of the `AbstractDirectoryWalker` class with the given directory,
@@ -58,6 +61,7 @@ public abstract class AbstractDirectoryWalker implements Walker {
      */
     @Override
     public boolean walk() {
+        this.isRunning.set(true);
         try {
             Thread thread = new Thread(() -> {
                 try {
@@ -72,6 +76,7 @@ public abstract class AbstractDirectoryWalker implements Walker {
             thread.join();
             this.afterWalk();
 
+            this.isRunning.set(false);
             return true;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -82,6 +87,13 @@ public abstract class AbstractDirectoryWalker implements Walker {
             return false;
         }
     }
+
+    @Override
+    public void stop() {
+        this.isRunning.set(false);
+        this.stopBehaviour();
+    }
+
 
     /**
      * Returns a defensive copy of the `DirectoryWalkerParams` object used to configure
@@ -109,6 +121,9 @@ public abstract class AbstractDirectoryWalker implements Walker {
      * @throws InterruptedException if the thread is interrupted
      */
     protected abstract void walkRec(Path directory) throws IOException, InterruptedException;
+
+
+    protected abstract void stopBehaviour();
 
     protected abstract void beforeWalk();
 
