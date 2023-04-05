@@ -1,20 +1,20 @@
 package walker;
 
-public class Pair<L, R> {
-    private final L left;
-    private final R right;
+public class Pair<X, Y> {
+    private final X x;
+    private final Y y;
 
-    public Pair(L left, R right) {
-        this.left = left;
-        this.right = right;
+    public Pair(X x, Y y) {
+        this.x = x;
+        this.y = y;
     }
 
-    public L getLeft() {
-        return left;
+    public X getX() {
+        return x;
     }
 
-    public R getRight() {
-        return right;
+    public Y getY() {
+        return y;
     }
 
     @Override
@@ -26,28 +26,28 @@ public class Pair<L, R> {
             return false;
         }
         Pair<?, ?> pair = (Pair<?, ?>) obj;
-        if (!left.equals(pair.left)) {
+        if (!x.equals(pair.x)) {
             return false;
         }
-        return right.equals(pair.right);
+        return y.equals(pair.y);
     }
 
     @Override
     public int hashCode() {
-        int result = left.hashCode();
-        result = 31 * result + right.hashCode();
+        int result = x.hashCode();
+        result = 31 * result + y.hashCode();
         return result;
     }
 
     @Override
     public String toString() {
         return "walker.Pair{" +
-                "left=" + left +
-                ", right=" + right +
+                "x=" + x +
+                ", y=" + y +
                 '}';
     }
 
-    public static <L, R> Pair<L, R> of(L left, R right) {
-        return new Pair<>(left, right);
+    public static <X, Y> Pair<X, Y> of(X x, Y y) {
+        return new Pair<>(x, y);
     }
 }
