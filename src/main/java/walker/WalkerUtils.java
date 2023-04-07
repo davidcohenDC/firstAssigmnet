@@ -14,12 +14,10 @@ public class WalkerUtils {
         try (Stream<String> fileStream = Files.lines(file)) {
             return (int) fileStream.count();
         } catch (UncheckedIOException e) {
-            //TODO
             if (e.getCause() instanceof MalformedInputException) {
-                System.out.println("MalformedInputException");
+                System.out.println("MalformedInputException"); //TODO
             }
             return 0;
         }
     }
-
 }

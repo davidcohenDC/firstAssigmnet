@@ -22,16 +22,16 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")
     implementation(files("lib/jpf-classes.jar"))
     implementation(files("lib/jpf-annotations.jar"))
-    implementation("org.projectlombok:lombok:1.18.20")
-    kapt("org.projectlombok:lombok:1.18.20")
+    //implementation("org.projectlombok:lombok:1.18.26")
+    //kapt("org.projectlombok:lombok:1.18.26")
 }
 
-kapt {
+/*kapt {
     arguments {
         arg("lombok.addLombokGeneratedAnnotation", "true")
     }
     useBuildCache = true
-}
+}*/
 
 tasks.getByName<Test>("test") {
     useJUnitPlatform()

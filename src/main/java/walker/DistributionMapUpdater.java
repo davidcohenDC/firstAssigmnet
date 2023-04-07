@@ -20,5 +20,4 @@ public class DistributionMapUpdater {
             throw new RuntimeException(e);
         }
     }
-
 }

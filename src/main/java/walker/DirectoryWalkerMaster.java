@@ -1,6 +1,5 @@
 package walker;
 
-import boundedbuffer.Distribution;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.DirectoryStream;
@@ -14,17 +13,29 @@ import java.util.concurrent.TimeUnit;
  * all Java files found within it. The class uses a distribution object to keep track of the number of lines in each
  * Java file, and provides methods for printing out various statistics and information about the files processed.
  */
-public class DirectoryWalkerAgent extends AbstractDirectoryWalker {
+public class DirectoryWalkerMaster extends AbstractDirectoryWalker {
 
-    private final DistributionMapUpdater updater;
+    private static final int NUMBER_CPU = Runtime.getRuntime().availableProcessors();
+    private static final int UTILIZATION_CPU = 1;
+    private static final int CONSTANT = 1;
+    private static final int WAIT_TIME = 1;
+    private static final int COMPUTE_TIME = 1;
+
     private final DistributionPrinter printer;
-    private final Semaphore threadSemaphore;
+    private final Semaphore semaphore;
 
-    public DirectoryWalkerAgent(Path dir, int maxFiles, int numIntervals, int maxLength, Distribution<Integer, Path> distribution, int maxThreads) {
-        super(dir, maxFiles, numIntervals, maxLength, distribution);
+    public DirectoryWalkerMaster(DirectoryWalkerParams params) {
+        super(params);
         this.printer = new DistributionPrinter(this.params, (int) TimeUnit.SECONDS.toSeconds(1));
-        this.updater = new DistributionMapUpdater(this.distribution);
-        this.threadSemaphore = new Semaphore(maxThreads);
+        int maxThread = this.numberThread(NUMBER_CPU, UTILIZATION_CPU, WAIT_TIME, COMPUTE_TIME);
+        this.semaphore = new Semaphore(maxThread);
+        //TODO check PERFORMANCE
+        System.out.println("Number of available processors: " + Runtime.getRuntime().availableProcessors());
+        System.out.println("Number of thread: " + maxThread);
+    }
+
+    private int numberThread(int numberCPU, int utilizationCPU, int waitTime, int computeTime) {
+        return numberCPU * utilizationCPU * (CONSTANT + waitTime/computeTime);
     }
 
     @Override
@@ -43,7 +54,7 @@ public class DirectoryWalkerAgent extends AbstractDirectoryWalker {
     @Override
     protected void walkRec(Path directory) throws IOException, InterruptedException {
         if (!this.isRunning.get()) return;
-        System.out.println("Walking " + directory);
+        //System.out.println("Walking " + directory); //TODO
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory)) {
             for (Path path : stream) {
                 try {
@@ -72,19 +83,13 @@ public class DirectoryWalkerAgent extends AbstractDirectoryWalker {
         return Files.isDirectory(path) && !Files.isHidden(path);
     }
 
-    private void createNewProcessingThread(Path path) throws InterruptedException {
-        this.threadSemaphore.acquire();
-        new Thread(() -> {
-            try {
-                try {
-                    this.updater.processFile(this.params.getInterval(WalkerUtils.countLines(path)), path);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            } finally {
-                this.threadSemaphore.release();
-            }
-        }).start();
+    private void createNewProcessingThread(Path path) throws InterruptedException, IOException {
+        this.semaphore.acquire();
+        try {
+            new ProcessingFileAgent(this.params, path).start();
+        } finally {
+            this.semaphore.release();
+        }
     }
 
 }

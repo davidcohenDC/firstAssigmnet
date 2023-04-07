@@ -3,7 +3,7 @@ package boundedbuffer;
 import java.util.List;
 import java.util.Map;
 
-public interface BoundedBuffer<X,Y> {
+public interface UnboundedBuffer<X,Y> {
 
     /**
      * Writes a value to the buffer at the specified key.

@@ -18,7 +18,7 @@ public class WalkerGUI {
     private final JButton stopButton;
     private final JTextArea maxFilesArea;
     private final JTextArea distributionArea;
-    private DirectoryWalkerAgent walker;
+    private DirectoryWalkerMaster walker;
     private volatile boolean isStopped;
 
 
@@ -183,7 +183,14 @@ public class WalkerGUI {
         Path dirPath = Paths.get(directory);
 
         Distribution<Integer, Path> distribution = new Distribution<>();
-        walker = new DirectoryWalkerAgent(dirPath, maxFiles, numIntervals, maxLength, distribution,Runtime.getRuntime().availableProcessors()-2);
+        DirectoryWalkerParams params = DirectoryWalkerParams.builder()
+                                                            .directory(dirPath)
+                                                            .maxFiles(maxFiles)
+                                                            .numIntervals(numIntervals)
+                                                            .maxLines(maxLength)
+                                                            .distribution(distribution)
+                                                            .build();
+        walker = new DirectoryWalkerMaster(params);
 
         isStopped = false;
         startButton.setEnabled(false);
@@ -220,7 +227,7 @@ public class WalkerGUI {
             return;
         }
 
-        DistributionPrinter printer = new DistributionPrinter(this.walker.getParams(), (int) TimeUnit.SECONDS.toSeconds(1));
+        DistributionPrinter printer = new DistributionPrinter(this.walker.params, (int) TimeUnit.SECONDS.toSeconds(1));
 
         SwingUtilities.invokeLater(() -> distributionArea.setText(printer.getDistributionString()));
 

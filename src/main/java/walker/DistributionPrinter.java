@@ -14,7 +14,7 @@ public class DistributionPrinter implements Runnable {
     private final DirectoryWalkerParams params;
     private final AtomicBoolean isPrinting = new AtomicBoolean(false);
     private final int intervalInSeconds;
-    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(); //TODO
     private List<Pair<Integer, Integer>> intervalRanges;
     private boolean isIntervalRangesDirty = true;
 
@@ -69,11 +69,11 @@ public class DistributionPrinter implements Runnable {
             updateIntervalRangesIfNeeded();
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < intervalRanges.size(); i++) {
-                int start = intervalRanges.get(i).getLeft();
-                int end = intervalRanges.get(i).getRight();
+                int start = intervalRanges.get(i).getX();
+                int end = intervalRanges.get(i).getY();
                 List<Path> list = this.params.getDistribution().readDistribution().getOrDefault(i, Collections.emptyList());
                 if (start == this.params.getMaxLines()) {
-                    sb.append("[").append(start).append(",+∞]: ").append(list.size()).append("\n");
+                    sb.append("[").append(start).append(",+inf]: ").append(list.size()).append("\n");
                 } else {
                     sb.append("[").append(start).append(",").append(end).append("]: ").append(list.size()).append("\n");
                 }
