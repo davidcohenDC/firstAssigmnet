@@ -36,22 +36,11 @@ public abstract class AbstractDirectoryWalker implements Walker {
     public boolean walk() {
         this.isRunning.set(true);
         try {
-            //TODO DirectoryWalkerAgent
-            Thread thread = new Thread(() -> {
-                try {
-                    walkRec(this.params.getDirectory());
-                    // TODO check PERFORMANCE
-                    System.out.println("------ Name of current thread " + Thread.currentThread().getName());
-                    System.out.println("------ Number of threads " + Thread.activeCount());
-                    System.out.println("------ Name of group thread " + Thread.currentThread().getThreadGroup().getName());
-                } catch (IOException | InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            thread.start();
+            DirectoryWalkerAgent directoryWalkerAgent = new DirectoryWalkerAgent(this, this.params.getDirectory());
+            directoryWalkerAgent.start();
 
             this.beforeWalk();
-            thread.join();
+            directoryWalkerAgent.join();
             this.afterWalk();
 
             this.isRunning.set(false);
@@ -82,7 +71,6 @@ public abstract class AbstractDirectoryWalker implements Walker {
      * @throws InterruptedException if the thread is interrupted
      */
     protected abstract void walkRec(Path directory) throws IOException, InterruptedException;
-
 
     protected abstract void stopBehaviour();
 

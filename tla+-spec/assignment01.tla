@@ -12,36 +12,39 @@
 \* ridurre il programma in uno minimale in modo che non cambia il coordinamento tra i thread
 
 EXTENDS TLC, Integers, Sequences
-CONSTANTS MaxQueueSize
+CONSTANTS MaxFiles, NumIntervals, MaxLines
+CONSTANTS MaxBufferSize
 
 (*--algorithm message_queue
-variable queue = <<>>; \* variabile condivisa
+variable buffer = <<>>, numReaders=0, numWriters=0; \* variabile condivisa
+
 define
   \* bounded buffer senza always [] da definire all'interno di Invariants
-  BoundedQueue == Len(queue) <= MaxQueueSize
+  Correctness == [](<>(numReaders>=0)) /\ [](<>(numWriters>=0))
+  \* BoundedBuffer == Len(buffer) <= MaxBufferSize
 end define;
 
-process producer \in { "prod1", "prod2" } \* due produttori
+process writer \in { "writer1", "writer2" }
 variable item = "";
-begin Produce:
+begin WriteInterval:
   while TRUE do
-    produce:
+    write:
         item := "item";
     put:
         \* operazioni atomiche
-        await Len(queue) < MaxQueueSize; \* aspetta che ci sia posto, Len: dimensione della coda
-        queue := Append(queue, item);
+        await Len(buffer) < MaxBufferSize; \* aspetta che ci sia posto, Len: dimensione della coda
+        queue := Append(buffer, item);
   end while;
 end process;
 
-process consumer \in { "cons1", "cons2" } \* due consumatori
+process reader \in { "reader1", "reader2" }
 variable item = "none";
-begin Consume:
+begin ReadInterval:
   while TRUE do
     take:
-        await queue /= <<>>;
-        item := Head(queue);  \* head: elemento della lista
-        queue := Tail(queue); \* tail: puntatore/riferimento alla coda della lista (che è il resto della lista) -> rimozione
+        await buffer /= <<>>;
+        item := Head(buffer);  \* head: elemento della lista
+        queue := Tail(buffer); \* tail: puntatore/riferimento alla coda della lista (che è il resto della lista) -> rimozione
     consume:
         print item; \* stampa degli elementi su console (astrazione del consumo degli elementi della coda)
   end while;

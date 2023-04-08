@@ -15,27 +15,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class DirectoryWalkerMaster extends AbstractDirectoryWalker {
 
-    private static final int NUMBER_CPU = Runtime.getRuntime().availableProcessors();
-    private static final int UTILIZATION_CPU = 1;
-    private static final int CONSTANT = 1;
-    private static final int WAIT_TIME = 1;
-    private static final int COMPUTE_TIME = 1;
-
     private final DistributionPrinter printer;
     private final Semaphore semaphore;
 
-    public DirectoryWalkerMaster(DirectoryWalkerParams params) {
+    public DirectoryWalkerMaster(DirectoryWalkerParams params, int maxThread) {
         super(params);
         this.printer = new DistributionPrinter(this.params, (int) TimeUnit.SECONDS.toSeconds(1));
-        int maxThread = this.numberThread(NUMBER_CPU, UTILIZATION_CPU, WAIT_TIME, COMPUTE_TIME);
         this.semaphore = new Semaphore(maxThread);
-        //TODO check PERFORMANCE
-        System.out.println("Number of available processors: " + Runtime.getRuntime().availableProcessors());
-        System.out.println("Number of thread: " + maxThread);
-    }
-
-    private int numberThread(int numberCPU, int utilizationCPU, int waitTime, int computeTime) {
-        return numberCPU * utilizationCPU * (CONSTANT + waitTime/computeTime);
     }
 
     @Override

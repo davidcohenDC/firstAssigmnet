@@ -190,7 +190,9 @@ public class WalkerGUI {
                                                             .maxLines(maxLength)
                                                             .distribution(distribution)
                                                             .build();
-        walker = new DirectoryWalkerMaster(params);
+        double utilizationCPU = 0.8;
+        int maxThread = new PerformanceUtils().getNumberThread(Runtime.getRuntime().availableProcessors(), utilizationCPU, 1, 1);
+        walker = new DirectoryWalkerMaster(params, maxThread);
 
         isStopped = false;
         startButton.setEnabled(false);
