@@ -155,12 +155,6 @@ public class WalkerGUI {
         int maxFiles;
         try {
             maxFiles = Integer.parseInt(maxFilesField.getText().trim());
-            if(maxFiles >= maxLength) {
-                JOptionPane.showMessageDialog
-                        (null, "Invalid value for max file: " + maxLengthField.getText().trim()
-                               +"!!\nValue need to be <= Max Files","Bad value", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
         } catch (NumberFormatException e) {
             showErrorDialog("Invalid value for max files: " + maxFilesField.getText().trim());
             return;
@@ -169,7 +163,7 @@ public class WalkerGUI {
         int numIntervals;
         try {
             numIntervals = Integer.parseInt(numIntervalsField.getText().trim());
-            if(numIntervals >= maxLength) {
+            if(numIntervals > maxLength) {
                 JOptionPane.showMessageDialog
                         (null, "Invalid value for num intervals: " + numIntervalsField.getText().trim()
                                 +"!!\nValue need to be <= Max Files","Bad value", JOptionPane.ERROR_MESSAGE);
@@ -183,7 +177,7 @@ public class WalkerGUI {
         Path dirPath = Paths.get(directory);
 
         Distribution<Integer, Path> distribution = new Distribution<>();
-        walker = new DirectoryWalkerAgent(dirPath, maxFiles, numIntervals, maxLength, distribution,Runtime.getRuntime().availableProcessors()-2);
+        walker = new DirectoryWalkerAgent(dirPath, maxFiles, numIntervals, maxLength, distribution,Runtime.getRuntime().availableProcessors());
 
         isStopped = false;
         startButton.setEnabled(false);
@@ -220,7 +214,7 @@ public class WalkerGUI {
             return;
         }
 
-        DistributionPrinter printer = new DistributionPrinter(this.walker.getParams(), (int) TimeUnit.SECONDS.toSeconds(1));
+        DistributionPrinterAgent printer = new DistributionPrinterAgent(this.walker.getParams(), (int) TimeUnit.SECONDS.toSeconds(1));
 
         SwingUtilities.invokeLater(() -> distributionArea.setText(printer.getDistributionString()));
 

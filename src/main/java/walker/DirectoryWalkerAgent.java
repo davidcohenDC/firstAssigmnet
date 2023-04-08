@@ -17,12 +17,12 @@ import java.util.concurrent.TimeUnit;
 public class DirectoryWalkerAgent extends AbstractDirectoryWalker {
 
     private final DistributionMapUpdater updater;
-    private final DistributionPrinter printer;
+    private final DistributionPrinterAgent printer;
     private final Semaphore threadSemaphore;
 
     public DirectoryWalkerAgent(Path dir, int maxFiles, int numIntervals, int maxLength, Distribution<Integer, Path> distribution, int maxThreads) {
         super(dir, maxFiles, numIntervals, maxLength, distribution);
-        this.printer = new DistributionPrinter(this.params, (int) TimeUnit.SECONDS.toSeconds(1));
+        this.printer = new DistributionPrinterAgent(this.params, (int) TimeUnit.SECONDS.toSeconds(1));
         this.updater = new DistributionMapUpdater(this.distribution);
         this.threadSemaphore = new Semaphore(maxThreads);
     }
@@ -38,7 +38,6 @@ public class DirectoryWalkerAgent extends AbstractDirectoryWalker {
         System.out.println("\nThe " + this.params.getMaxFiles() + " files with the highest number of lines are: \n" + this.printer.getMaxFilesString());
         System.out.println("\nThe distribution of files is:\n" + this.printer.getDistributionString());
     }
-
 
     @Override
     protected void walkRec(Path directory) throws IOException, InterruptedException {
@@ -86,5 +85,4 @@ public class DirectoryWalkerAgent extends AbstractDirectoryWalker {
             }
         }).start();
     }
-
 }

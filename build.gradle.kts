@@ -25,13 +25,13 @@ dependencies {
     implementation("org.projectlombok:lombok:1.18.20")
     kapt("org.projectlombok:lombok:1.18.20")
 }
-
-kapt {
-    arguments {
-        arg("lombok.addLombokGeneratedAnnotation", "true")
-    }
-    useBuildCache = true
-}
+//
+//kapt {
+//    arguments {
+//        arg("lombok.addLombokGeneratedAnnotation", "true")
+//    }
+//    useBuildCache = true
+//}
 
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
