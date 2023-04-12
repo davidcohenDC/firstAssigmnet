@@ -6,6 +6,8 @@ import chrono.Chrono;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestWalker {
 
@@ -15,7 +17,7 @@ public class TestWalker {
              System.exit(1);
          }
 
-         String directory = args[WalkerArguments.DIRECTORY.ordinal()]; //"C:\\Users\\HP\\Desktop\\UNIBO\\LaureaMagistrale";
+         String directory = args[WalkerArguments.DIRECTORY.ordinal()];
          int maxFiles = Integer.parseInt(args[WalkerArguments.N_FILES.ordinal()]);
          int numIntervals = Integer.parseInt(args[WalkerArguments.NUMBER_OF_INTERVALS.ordinal()]);
          int maxLength = Integer.parseInt(args[WalkerArguments.MAX_LINES.ordinal()]);
@@ -38,33 +40,46 @@ public class TestWalker {
                                              .maxLines(maxLength)
                                              .distribution(distribution)
                                              .build();
-         int maxThread = new PerformanceUtils().getDefaultNumThread();
-         /*Walker walker = new DirectoryWalkerMaster(params, maxThread);
+         int maxThread = PerformanceUtils.getDefaultNumThread(); //PerformanceUtils.getNumberThread(PerformanceUtils.getNumberCpu(), 1, 0.2);
+         Walker walker = new DirectoryWalkerMaster(params, maxThread);
          Chrono cron = new Chrono();
          cron.start();
          try {
              walker.walk();
              cron.stop();
-             System.out.println("Time elapsed: " + cron.getTime() + " milliseconds"); //TODO check PERFORMANCE
-             System.out.println("Number of available processors: " + Runtime.getRuntime().availableProcessors());
-             System.out.println("Number of thread: " + maxThread);
+             System.out.println("PERFORMANCE - Time elapsed: " + cron.getTime() + " milliseconds");
+             System.out.println("PERFORMANCE - Number of available processors: " + Runtime.getRuntime().availableProcessors());
+             System.out.println("PERFORMANCE - Number of thread: " + maxThread);
          } catch (IOException e) {
              throw new RuntimeException(e);
-         }*/
+         }
 
+         // PERFORMANCE - test
+         /*Distribution<Integer, Path> distribution = new Distribution<>();
+         DirectoryWalkerParams params = DirectoryWalkerParams.builder()
+                 .directory(dir.toPath())
+                 .maxFiles(maxFiles)
+                 .numIntervals(numIntervals)
+                 .maxLines(maxLength)
+                 .distribution(distribution)
+                 .build();
 
-         for (int i=0; i<maxThread; i++) {
-             //creazione directoryWalkerParams con thread i
-             Walker walker = new DirectoryWalkerMaster(params, maxThread);
+         //int maxThread = PerformanceUtils.getDefaultNumThread();
+         List<Double> stepsRatioWaitComputeTime = new ArrayList<>(List.of(0.0, 0.2, 0.4, 0.6, 0.8, 1.0));
+         for (Double step : stepsRatioWaitComputeTime) {
+             int nThread = PerformanceUtils.getNumberThread(PerformanceUtils.getNumberCpu(), 1, step);
+             Walker walker = new DirectoryWalkerMaster(params, nThread);
              Chrono crono = new Chrono();
              crono.start();
              try {
                  walker.walk();
                  crono.stop();
-                 System.out.println("Time elapsed: " + crono.getTime() + " milliseconds"); //TODO check PERFORMANCE
+                 System.out.println("PERFORMANCE - Time elapsed: " + crono.getTime() + " milliseconds");
+                 System.out.println("PERFORMANCE - nThread: " + nThread);
+                 System.out.println("PERFORMANCE - W/C: " + step);
              } catch (IOException e) {
                  throw new RuntimeException(e);
              }
-         }
+         }*/
      }
 }

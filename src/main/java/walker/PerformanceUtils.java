@@ -3,16 +3,18 @@ package walker;
 public class PerformanceUtils {
 
     private static final int NUMBER_CPU = Runtime.getRuntime().availableProcessors();
-    private static final int UTILIZATION_CPU = 1;
     private static final int CONSTANT = 1;
-    private static final int WAIT_TIME = 1;
-    private static final int COMPUTE_TIME = 1;
+    private static final int DOUBLE = 2;
 
-    public int getDefaultNumThread() {
-        return this.getNumberThread(NUMBER_CPU, UTILIZATION_CPU, WAIT_TIME, COMPUTE_TIME);
+    public static int getDefaultNumThread() {
+        return NUMBER_CPU * DOUBLE;
     }
 
-    public int getNumberThread(int numberCPU, double utilizationCPU, int waitTime, int computeTime) {
-        return (int) (numberCPU * utilizationCPU * (CONSTANT + waitTime/computeTime));
+    public static int getNumberThread(int numberCPU, double utilizationCPU, double ratioWaitComputeTime) {
+        return (int) (numberCPU * utilizationCPU * (CONSTANT + ratioWaitComputeTime));
+    }
+
+    public static int getNumberCpu() {
+        return NUMBER_CPU;
     }
 }

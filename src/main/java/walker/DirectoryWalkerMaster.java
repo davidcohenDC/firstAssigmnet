@@ -15,12 +15,12 @@ import java.util.concurrent.TimeUnit;
  */
 public class DirectoryWalkerMaster extends AbstractDirectoryWalker {
 
-    private final DistributionPrinter printer;
+    private final DistributionPrinterAgent printer;
     private final Semaphore semaphore;
 
     public DirectoryWalkerMaster(DirectoryWalkerParams params, int maxThread) {
         super(params);
-        this.printer = new DistributionPrinter(this.params, (int) TimeUnit.SECONDS.toSeconds(1));
+        this.printer = new DistributionPrinterAgent(this.params, (int) TimeUnit.SECONDS.toSeconds(1));
         this.semaphore = new Semaphore(maxThread);
     }
 
@@ -40,7 +40,7 @@ public class DirectoryWalkerMaster extends AbstractDirectoryWalker {
     @Override
     protected void walkRec(Path directory) throws IOException, InterruptedException {
         if (!this.isRunning.get()) return;
-        //System.out.println("Walking " + directory); //TODO
+        System.out.println("Walking " + directory);
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory)) {
             for (Path path : stream) {
                 try {

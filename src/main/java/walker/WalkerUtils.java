@@ -15,7 +15,7 @@ public class WalkerUtils {
             return (int) fileStream.count();
         } catch (UncheckedIOException e) {
             if (e.getCause() instanceof MalformedInputException) {
-                System.out.println("Ignored file " + file + " because malformed"); //TODO
+                System.out.println("Ignored file " + file + " because malformed");
             }
             return 0;
         }

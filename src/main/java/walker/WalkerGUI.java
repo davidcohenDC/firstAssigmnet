@@ -191,7 +191,7 @@ public class WalkerGUI {
                                                             .distribution(distribution)
                                                             .build();
         double utilizationCPU = 0.8;
-        int maxThread = new PerformanceUtils().getNumberThread(Runtime.getRuntime().availableProcessors(), utilizationCPU, 1, 1);
+        int maxThread = PerformanceUtils.getNumberThread(Runtime.getRuntime().availableProcessors(), utilizationCPU, 1);
         walker = new DirectoryWalkerMaster(params, maxThread);
 
         isStopped = false;
@@ -229,7 +229,7 @@ public class WalkerGUI {
             return;
         }
 
-        DistributionPrinter printer = new DistributionPrinter(this.walker.params, (int) TimeUnit.SECONDS.toSeconds(1));
+        DistributionPrinterAgent printer = new DistributionPrinterAgent(this.walker.params, (int) TimeUnit.SECONDS.toSeconds(1));
 
         SwingUtilities.invokeLater(() -> distributionArea.setText(printer.getDistributionString()));
 

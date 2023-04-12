@@ -52,6 +52,7 @@ begin ReadInterval:
   end while;
 end process;
 end algorithm;*)
+
 \* BEGIN TRANSLATION (chksum(pcal) = "eea3a9f8" /\ chksum(tla) = "b5e0f796")
 \* Process variable item of process writer at line 27 col 10 changed to item_
 VARIABLES distribution, mutex, pc

@@ -12,6 +12,7 @@ define
   MutualExclusion == []~(pc["writer1"] = "write" /\ (pc["reader1"] = "read" \/ pc["reader2"] = "read"))
   NoStarvationWriter == [](pc["writer1"] = "w1" ~> <>(pc["writer1"] = "write"))
   NoStarvationReader == []((pc["reader1"] = "w2" ~> <>(pc["reader1"] = "read")) \/ (pc["reader2"] = "w2" ~> <>(pc["reader2"] = "read")))
+  DeadlockFreedom == \A subset \in SUBSET { "writer1", "reader1", "reader2" } : ~(subset = {} /\ \A self \in subset : pc[self] \in {"ReadInterval", "WriteInterval"})
 end define;
 
 macro wait(s) begin
@@ -34,12 +35,13 @@ begin WriteInterval:
         s1: signal(mutex);
     put:
         await Len(distribution) < MaxNumFiles;
+        \*Contains(item) == item \in UnionSeq(distribution)
         distribution := Append(distribution, item);
   end while;
 end process;
 
 fair+ process reader \in { "reader1", "reader2" }
-variable item = <<>>;
+variable item = <<"none", "none">>;
 begin ReadInterval:
   while TRUE do
     take:
@@ -52,8 +54,9 @@ begin ReadInterval:
   end while;
 end process;
 end algorithm;*)
-\* BEGIN TRANSLATION (chksum(pcal) = "eea3a9f8" /\ chksum(tla) = "b5e0f796")
-\* Process variable item of process writer at line 27 col 10 changed to item_
+
+\* BEGIN TRANSLATION (chksum(pcal) = "e379607b" /\ chksum(tla) = "1afe7402")
+\* Process variable item of process writer at line 28 col 10 changed to item_
 VARIABLES distribution, mutex, pc
 
 (* define statement *)
@@ -61,6 +64,7 @@ NoOverflowFiles == Len(distribution) <= MaxNumFiles
 MutualExclusion == []~(pc["writer1"] = "write" /\ (pc["reader1"] = "read" \/ pc["reader2"] = "read"))
 NoStarvationWriter == [](pc["writer1"] = "w1" ~> <>(pc["writer1"] = "write"))
 NoStarvationReader == []((pc["reader1"] = "w2" ~> <>(pc["reader1"] = "read")) \/ (pc["reader2"] = "w2" ~> <>(pc["reader2"] = "read")))
+DeadlockFreedom == \A subset \in SUBSET { "writer1", "reader1", "reader2" } : ~(subset = {} /\ \A self \in subset : pc[self] \in {"ReadInterval", "WriteInterval"})
 
 VARIABLES item_, item
 
@@ -74,7 +78,7 @@ Init == (* Global variables *)
         (* Process writer *)
         /\ item_ = [self \in { "writer1" } |-> <<>>]
         (* Process reader *)
-        /\ item = [self \in { "reader1", "reader2" } |-> <<>>]
+        /\ item = [self \in { "reader1", "reader2" } |-> <<"none", "none">>]
         /\ pc = [self \in ProcSet |-> CASE self \in { "writer1" } -> "WriteInterval"
                                         [] self \in { "reader1", "reader2" } -> "ReadInterval"]
 
