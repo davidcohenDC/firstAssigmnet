@@ -26,7 +26,7 @@ public class Distribution<X,Y> implements UnboundedBuffer<X,Y> {
     public void writeInterval(X key, Y item) throws InterruptedException {
         lock.writeLock().lockInterruptibly();
         try {
-            this.buffer.merge(key, Arrays.asList(item), (list1, list2) -> { //Arrays.asList(item)
+            this.buffer.merge(key, new ArrayList<>(List.of(item)), (list1, list2) -> { //Arrays.asList(item)
                 list1.addAll(list2);
                 return list1;
             });
@@ -39,7 +39,7 @@ public class Distribution<X,Y> implements UnboundedBuffer<X,Y> {
     public List<Y> readInterval(X key) throws InterruptedException {
         lock.readLock().lockInterruptibly();
         try {
-            return buffer.get(key); //buffer.get(key);
+            return List.copyOf(buffer.get(key)); //buffer.get(key);
         } finally {
             lock.readLock().unlock();
         }
@@ -49,7 +49,7 @@ public class Distribution<X,Y> implements UnboundedBuffer<X,Y> {
     public Map<X, List<Y>> readDistribution() {
         lock.readLock().lock();
         try {
-            return buffer; //buffer;
+            return Map.copyOf(buffer); //buffer;
         } finally {
             lock.readLock().unlock();
         }
