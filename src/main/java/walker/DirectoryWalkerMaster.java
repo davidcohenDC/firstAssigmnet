@@ -40,7 +40,7 @@ public class DirectoryWalkerMaster extends AbstractDirectoryWalker {
     @Override
     protected void walkRec(Path directory) throws IOException, InterruptedException {
         if (!this.isRunning.get()) return;
-        System.out.println("Walking " + directory);
+        //System.out.println("Walking " + directory); TODO
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory)) {
             for (Path path : stream) {
                 try {

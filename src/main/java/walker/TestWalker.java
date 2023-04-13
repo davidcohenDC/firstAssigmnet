@@ -7,7 +7,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 public class TestWalker {
 
@@ -47,39 +50,8 @@ public class TestWalker {
          try {
              walker.walk();
              cron.stop();
-             System.out.println("PERFORMANCE - Time elapsed: " + cron.getTime() + " milliseconds");
-             System.out.println("PERFORMANCE - Number of available processors: " + Runtime.getRuntime().availableProcessors());
-             System.out.println("PERFORMANCE - Number of thread: " + maxThread);
          } catch (IOException e) {
              throw new RuntimeException(e);
          }
-
-         // PERFORMANCE - test
-         /*Distribution<Integer, Path> distribution = new Distribution<>();
-         DirectoryWalkerParams params = DirectoryWalkerParams.builder()
-                 .directory(dir.toPath())
-                 .maxFiles(maxFiles)
-                 .numIntervals(numIntervals)
-                 .maxLines(maxLength)
-                 .distribution(distribution)
-                 .build();
-
-         //int maxThread = PerformanceUtils.getDefaultNumThread();
-         List<Double> stepsRatioWaitComputeTime = new ArrayList<>(List.of(0.0, 0.2, 0.4, 0.6, 0.8, 1.0));
-         for (Double step : stepsRatioWaitComputeTime) {
-             int nThread = PerformanceUtils.getNumberThread(PerformanceUtils.getNumberCpu(), 1, step);
-             Walker walker = new DirectoryWalkerMaster(params, nThread);
-             Chrono crono = new Chrono();
-             crono.start();
-             try {
-                 walker.walk();
-                 crono.stop();
-                 System.out.println("PERFORMANCE - Time elapsed: " + crono.getTime() + " milliseconds");
-                 System.out.println("PERFORMANCE - nThread: " + nThread);
-                 System.out.println("PERFORMANCE - W/C: " + step);
-             } catch (IOException e) {
-                 throw new RuntimeException(e);
-             }
-         }*/
      }
 }
