@@ -7,7 +7,7 @@ public enum WalkerArguments {
     MAX_LINES(3),
     ARGUMENTS_SIZE(4);
 
-    private int value;
+    private final int value;
 
     WalkerArguments(int value) {
         this.value = value;
