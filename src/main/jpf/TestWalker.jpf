@@ -1,4 +1,4 @@
-target = walker.TestWalker
+target = jpf.SimpleWalkerJpfTest
 
 classpath=build/classes/java/main
 
