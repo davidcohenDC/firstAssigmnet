@@ -14,7 +14,7 @@ public class SimpleJPFWalker {
 
     private final int numIntervals;
 
-    private final Semaphore semaphore = new Semaphore(10);
+    private final Semaphore semaphore = new Semaphore(2);
 
     private final Map<Integer, List<String>> simpleDistribution = new ConcurrentHashMap<>();
 
@@ -51,23 +51,24 @@ public class SimpleJPFWalker {
                 }
                 Thread processingThread = new Thread(() -> {
                     synchronized (this.simpleDistribution) {
-                        List<String> files = this.simpleDistribution.computeIfAbsent(finalInterval, k -> new ArrayList<>());
-                        files.add(fileWithLines.getY());
+                        if(fileWithLines.getY().endsWith(".java")) {
+                            List<String> files = this.simpleDistribution.computeIfAbsent(finalInterval, k -> new ArrayList<>());
+                            files.add(fileWithLines.getY());
+                        }
                     }
                 });
                 processingThread.start();
                 this.semaphore.release();
             }
-            this.walkerFinished = true;
         });
 
 
         this.printerAgent = new Thread(() -> {
-            while (!walkerFinished) {
+            while (true) {
                 try {
                     Thread.sleep(10);
                     synchronized (this.simpleDistribution) {
-                        System.out.println(this.simpleDistribution.get(0).size());
+                        System.out.println(this.simpleDistribution);
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -96,16 +97,8 @@ public class SimpleJPFWalker {
     }
 
     private void populateFiles() {
-        for (int i = 0; i < 1000; i++) {
-            this.filesWithLines.add(new Pair<>(0,"PCD/"));
-            this.filesWithLines.add(new Pair<>(120,"PCD/test/testMain.java"));
-            this.filesWithLines.add(new Pair<>(150,"PCD/test/file1.java"));
-            this.filesWithLines.add(new Pair<>(0,"PCD/src/"));
-            this.filesWithLines.add(new Pair<>(10,"PCD/src/main.java"));
-            this.filesWithLines.add(new Pair<>(74,"PCD/src/walker.java"));
-            this.filesWithLines.add(new Pair<>(0,"PCD/README.md"));
-            this.filesWithLines.add(new Pair<>(0,"PCD/test/"));
-            this.filesWithLines.add(new Pair<>(30,"PCD/src/distribution.java"));
-        }
+        this.filesWithLines.add(new Pair<>(30,"PCD/src/"));
+        this.filesWithLines.add(new Pair<>(50,"PCD/src/main.java"));
+        this.filesWithLines.add(new Pair<>(150,"PCD/test/test.java"));
     }
 }
