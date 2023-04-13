@@ -45,7 +45,7 @@ public class DistributionPrinterAgent implements Runnable {
 //            // Already printing
 //            return;
 //        }
-        
+
         isPrinting.set(true);
         new Thread(() -> {
             try {
@@ -74,8 +74,8 @@ public class DistributionPrinterAgent implements Runnable {
             this.updateIntervalRangesIfNeeded();
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < intervalRanges.size(); i++) {
-                int start = intervalRanges.get(i).getLeft();
-                int end = intervalRanges.get(i).getRight();
+                int start = intervalRanges.get(i).getX();
+                int end = intervalRanges.get(i).getY();
                 List<Path> list = this.params.getDistribution().readDistribution().getOrDefault(i, Collections.emptyList());
                 if (start == this.params.getMaxLines()) {
                     sb.append("[").append(start).append(",+inf]: ").append(list.size()).append("\n");

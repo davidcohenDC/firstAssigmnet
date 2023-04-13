@@ -18,7 +18,7 @@ public class WalkerGUI {
     private final JButton stopButton;
     private final JTextArea maxFilesArea;
     private final JTextArea distributionArea;
-    private DirectoryWalkerAgent walker;
+    private DirectoryWalkerMaster walker;
     private volatile boolean isStopped;
 
 
@@ -155,6 +155,12 @@ public class WalkerGUI {
         int maxFiles;
         try {
             maxFiles = Integer.parseInt(maxFilesField.getText().trim());
+            if(maxFiles >= maxLength) {
+                JOptionPane.showMessageDialog
+                        (null, "Invalid value for max file: " + maxLengthField.getText().trim()
+                               +"!!\nValue need to be <= Max Files","Bad value", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
         } catch (NumberFormatException e) {
             showErrorDialog("Invalid value for max files: " + maxFilesField.getText().trim());
             return;
@@ -163,7 +169,7 @@ public class WalkerGUI {
         int numIntervals;
         try {
             numIntervals = Integer.parseInt(numIntervalsField.getText().trim());
-            if(numIntervals > maxLength) {
+            if(numIntervals >= maxLength) {
                 JOptionPane.showMessageDialog
                         (null, "Invalid value for num intervals: " + numIntervalsField.getText().trim()
                                 +"!!\nValue need to be <= Max Files","Bad value", JOptionPane.ERROR_MESSAGE);
@@ -177,7 +183,16 @@ public class WalkerGUI {
         Path dirPath = Paths.get(directory);
 
         Distribution<Integer, Path> distribution = new Distribution<>();
-        walker = new DirectoryWalkerAgent(dirPath, maxFiles, numIntervals, maxLength, distribution,Runtime.getRuntime().availableProcessors());
+        DirectoryWalkerParams params = DirectoryWalkerParams.builder()
+                                                            .directory(dirPath)
+                                                            .maxFiles(maxFiles)
+                                                            .numIntervals(numIntervals)
+                                                            .maxLines(maxLength)
+                                                            .distribution(distribution)
+                                                            .build();
+        double utilizationCPU = 0.8;
+        int maxThread = PerformanceUtils.getNumberThread(Runtime.getRuntime().availableProcessors(), utilizationCPU, 1);
+        walker = new DirectoryWalkerMaster(params, maxThread);
 
         isStopped = false;
         startButton.setEnabled(false);
@@ -214,7 +229,7 @@ public class WalkerGUI {
             return;
         }
 
-        DistributionPrinterAgent printer = new DistributionPrinterAgent(this.walker.getParams(), (int) TimeUnit.SECONDS.toSeconds(1));
+        DistributionPrinterAgent printer = new DistributionPrinterAgent(this.walker.params, (int) TimeUnit.SECONDS.toSeconds(1));
 
         SwingUtilities.invokeLater(() -> distributionArea.setText(printer.getDistributionString()));
 

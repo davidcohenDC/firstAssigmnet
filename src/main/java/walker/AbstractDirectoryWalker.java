@@ -1,7 +1,5 @@
 package walker;
 
-import boundedbuffer.Distribution;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -17,39 +15,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public abstract class AbstractDirectoryWalker implements Walker {
 
-    // The directory to be walked
-    protected final Path directory;
-
-    // The distribution of files based on some criterion
-    protected final Distribution<Integer,Path> distribution;
-
-    // The parameters for configuring the directory walking behavior
+    /**
+     * The parameters for configuring the directory walking behavior.
+     */
     protected final DirectoryWalkerParams params;
     protected final AtomicBoolean isRunning = new AtomicBoolean(false);
 
-
-    /**
-     * Creates a new instance of the `AbstractDirectoryWalker` class with the given directory,
-     * distribution, and configuration parameters.
-     *
-     * @param directory the directory to be walked
-     * @param maxFiles the maximum number of files to be tracked in the distribution
-     * @param numIntervals the number of intervals to divide the distribution into
-     * @param maxLength the maximum number of lines allowed in a file
-     * @param distributionMap the distribution of files based on some criterion
-     */
-    public AbstractDirectoryWalker(Path directory, int maxFiles, int numIntervals,
-                                   int maxLength, Distribution<Integer,Path> distributionMap) {
-        // Initialize the fields
-        this.directory = directory;
-        this.distribution = distributionMap;
-        this.params = DirectoryWalkerParams.builder()
-                .directory(directory)
-                .maxFiles(maxFiles)
-                .numIntervals(numIntervals)
-                .maxLines(maxLength)
-                .distribution(distributionMap)
-                .build();
+    public AbstractDirectoryWalker(DirectoryWalkerParams params) {
+        this.params = params;
     }
 
     /**
@@ -63,17 +36,11 @@ public abstract class AbstractDirectoryWalker implements Walker {
     public boolean walk() {
         this.isRunning.set(true);
         try {
-            Thread thread = new Thread(() -> {
-                try {
-                    walkRec(directory);
-                } catch (IOException | InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            thread.start();
+            DirectoryWalkerAgent directoryWalkerAgent = new DirectoryWalkerAgent(this, this.params.getDirectory());
+            directoryWalkerAgent.start();
 
             this.beforeWalk();
-            thread.join();
+            directoryWalkerAgent.join();
             this.afterWalk();
 
             this.isRunning.set(false);
@@ -94,23 +61,6 @@ public abstract class AbstractDirectoryWalker implements Walker {
         this.stopBehaviour();
     }
 
-
-    /**
-     * Returns a defensive copy of the `DirectoryWalkerParams` object used to configure
-     * the directory walking behavior.
-     *
-     * @return a defensive copy of the `DirectoryWalkerParams` object
-     */
-    public DirectoryWalkerParams getParams() {
-        return DirectoryWalkerParams.builder()
-                .directory(this.params.getDirectory())
-                .maxFiles(this.params.getMaxFiles())
-                .numIntervals(this.params.getNumIntervals())
-                .maxLines(this.params.getMaxLines())
-                .distribution(this.params.getDistribution())
-                .build();
-    }
-
     /**
      * Performs the actual directory walking and file processing for the given directory.
      * This method is abstract and must be implemented by the concrete subclasses to provide
@@ -121,7 +71,6 @@ public abstract class AbstractDirectoryWalker implements Walker {
      * @throws InterruptedException if the thread is interrupted
      */
     protected abstract void walkRec(Path directory) throws IOException, InterruptedException;
-
 
     protected abstract void stopBehaviour();
 

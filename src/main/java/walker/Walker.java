@@ -16,8 +16,6 @@ public interface Walker {
 
     void stop();
 
-    DirectoryWalkerParams getParams();
-
 }
 
 

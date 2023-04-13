@@ -1,4 +1,4 @@
-target = lab02.jpf.TestScenarios
+target = walker.TestWalker
 
 classpath=build/classes/java/main
 
